@@ -237,12 +237,41 @@ def is_seven(hand_landmarks):
     middle_pip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_PIP]
     ring_pip = landmarks[mp_hands.HandLandmark.RING_FINGER_PIP]
     pinky_pip = landmarks[mp_hands.HandLandmark.PINKY_PIP]
+    pinky_dip = landmarks[mp_hands.HandLandmark.PINKY_DIP]
     
     is_seven = equality(middle_pip.y, ring_pip.y) and equality(middle_pip.y, pinky_pip.y) \
         and thumb_cmc.y > thumb_mcp.y and thumb_mcp.y > thumb_ip.y and thumb_ip.y > thumb_tip.y \
-        and index_tip.y < index_dip.y and index_dip.y < index_pip.y and index_pip.y < index_mcp.y
+        and index_tip.y < index_dip.y and index_dip.y < index_pip.y and index_pip.y < index_mcp.y and pinky_pip.y < pinky_dip.y
 
     return is_seven
+
+def is_hookem(hand_landmarks):
+    landmarks = hand_landmarks.landmark
+    index_mcp = landmarks[mp_hands.HandLandmark.INDEX_FINGER_MCP]
+    index_pip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_PIP]
+    index_dip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_DIP]
+    index_tip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP]
+    
+    pinky_dip = landmarks[mp_hands.HandLandmark.PINKY_DIP]
+    pinky_tip = landmarks[mp_hands.HandLandmark.PINKY_TIP]
+    pinky_mcp = landmarks[mp_hands.HandLandmark.PINKY_MCP]
+    pinky_pip = landmarks[mp_hands.HandLandmark.PINKY_PIP]
+    
+    thumb_tip = landmarks[mp_hands.HandLandmark.THUMB_TIP]
+    thumb_ip = landmarks[mp_hands.HandLandmark.THUMB_IP]
+    middle_dip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_DIP]
+    middle_pip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_PIP]
+    middle_mcp = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_MCP]
+    ring_pip = landmarks[mp_hands.HandLandmark.RING_FINGER_PIP]    
+    ring_dip = landmarks[mp_hands.HandLandmark.RING_FINGER_DIP]
+    ring_mcp = landmarks[mp_hands.HandLandmark.RING_FINGER_MCP]
+    
+    is_hookem = index_tip.y < index_dip.y and index_dip.y < index_pip.y and index_pip.y < index_mcp.y \
+        and pinky_tip.y < pinky_dip.y and pinky_dip.y < pinky_pip.y and pinky_pip.y < pinky_mcp.y \
+        and index_pip.y < thumb_tip.y and thumb_tip.x > thumb_ip.x \
+        and middle_pip.y < middle_mcp.y and ring_pip.y < ring_mcp.y
+    
+    return is_hookem
 
 with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) as hands: 
     while cap.isOpened():
@@ -291,6 +320,9 @@ with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) a
                 
                     elif is_seven(hand_landmarks):
                         print("7 Fingers Recognized")
+
+                    elif is_hookem(hand_landmarks):
+                        print("HOOK'EM BABY")
                 
                 elif hand_label == "Left":
                     if is_five_left(hand_landmarks):
