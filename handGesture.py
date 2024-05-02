@@ -298,6 +298,60 @@ def is_hookem(hand_landmarks):
     
     return is_hookem
 
+def is_one_pointer_right(hand_landmarks):
+    landmarks = hand_landmarks.landmark
+    index_mcp = landmarks[mp_hands.HandLandmark.INDEX_FINGER_MCP]
+    index_pip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_PIP]
+    index_dip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_DIP]
+    index_tip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP]
+    
+    pinky_dip = landmarks[mp_hands.HandLandmark.PINKY_DIP]
+    pinky_tip = landmarks[mp_hands.HandLandmark.PINKY_TIP]
+    pinky_mcp = landmarks[mp_hands.HandLandmark.PINKY_MCP]
+    pinky_pip = landmarks[mp_hands.HandLandmark.PINKY_PIP]
+    
+    thumb_tip = landmarks[mp_hands.HandLandmark.THUMB_TIP]
+    thumb_ip = landmarks[mp_hands.HandLandmark.THUMB_IP]
+    middle_dip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_DIP]
+    middle_pip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_PIP]
+    middle_mcp = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_MCP]
+    ring_pip = landmarks[mp_hands.HandLandmark.RING_FINGER_PIP]    
+    ring_dip = landmarks[mp_hands.HandLandmark.RING_FINGER_DIP]
+    ring_mcp = landmarks[mp_hands.HandLandmark.RING_FINGER_MCP]
+    
+    is_one_pointer_right = index_mcp.y < index_dip.y and middle_mcp.y < middle_dip.y and ring_mcp.y < ring_dip.y \
+        and pinky_mcp.y < pinky_dip.y and thumb_tip.y > index_dip.y and abs(index_pip.y - thumb_tip.y) > 0.1 \
+        and index_mcp.x < index_tip.x
+    
+    return is_one_pointer_right
+
+def is_one_pointer_left(hand_landmarks):
+    landmarks = hand_landmarks.landmark
+    index_mcp = landmarks[mp_hands.HandLandmark.INDEX_FINGER_MCP]
+    index_pip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_PIP]
+    index_dip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_DIP]
+    index_tip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP]
+    
+    pinky_dip = landmarks[mp_hands.HandLandmark.PINKY_DIP]
+    pinky_tip = landmarks[mp_hands.HandLandmark.PINKY_TIP]
+    pinky_mcp = landmarks[mp_hands.HandLandmark.PINKY_MCP]
+    pinky_pip = landmarks[mp_hands.HandLandmark.PINKY_PIP]
+    
+    thumb_tip = landmarks[mp_hands.HandLandmark.THUMB_TIP]
+    thumb_ip = landmarks[mp_hands.HandLandmark.THUMB_IP]
+    middle_dip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_DIP]
+    middle_pip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_PIP]
+    middle_mcp = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_MCP]
+    ring_pip = landmarks[mp_hands.HandLandmark.RING_FINGER_PIP]    
+    ring_dip = landmarks[mp_hands.HandLandmark.RING_FINGER_DIP]
+    ring_mcp = landmarks[mp_hands.HandLandmark.RING_FINGER_MCP]
+    
+    is_one_pointer_left = index_mcp.y < index_dip.y and middle_mcp.y < middle_dip.y and ring_mcp.y < ring_dip.y \
+        and pinky_mcp.y < pinky_dip.y and thumb_tip.y > index_dip.y and abs(index_pip.y - thumb_tip.y) > 0.1 \
+        and index_mcp.x > index_tip.x
+    
+    return is_one_pointer_left
+
 with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) as hands: 
     while cap.isOpened():
         success, image = cap.read() 
@@ -348,6 +402,12 @@ with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) a
 
                     elif is_hookem(hand_landmarks):
                         print("HOOK'EM BABY")
+
+                    elif is_one_pointer_right(hand_landmarks):
+                        print("TURN RIGHT")
+
+                    elif is_one_pointer_left(hand_landmarks):
+                        print("TURN LEFT")
                 
                 elif hand_label == "Left":
                     if is_five_left(hand_landmarks):
