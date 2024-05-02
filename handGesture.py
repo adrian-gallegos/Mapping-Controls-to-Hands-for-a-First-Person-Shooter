@@ -15,9 +15,11 @@ def is_gun_gesture(hand_landmarks):
     thumb_tip = landmarks[mp_hands.HandLandmark.THUMB_TIP]
     index_tip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP]
     middle_finger_tip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
+    index_pip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_PIP]
+    pinky_pip = landmarks[mp_hands.HandLandmark.PINKY_PIP]
 
     is_gun = index_tip.y < middle_finger_tip.y and thumb_tip.y < index_tip.y \
-        and abs(index_tip.x - thumb_tip.x) > 0.1
+        and abs(index_tip.x - thumb_tip.x) > 0.1 and abs(index_pip.y - pinky_pip.y) > 0.1
 
     return is_gun
 
@@ -200,7 +202,7 @@ def is_five_left(hand_landmarks):
         and thumb_cmc.y > thumb_mcp.y and thumb_mcp.y > thumb_ip.y and thumb_ip.y > thumb_tip.y and thumb_tip.x > thumb_ip.x
     return is_five_left
 
-def is_six(hand_landmarks):
+def is_six_right(hand_landmarks):
     landmarks = hand_landmarks.landmark
     index_pip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_PIP]
     index_dip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_DIP]
@@ -215,11 +217,34 @@ def is_six(hand_landmarks):
     ring_pip = landmarks[mp_hands.HandLandmark.RING_FINGER_PIP]
     pinky_pip = landmarks[mp_hands.HandLandmark.PINKY_PIP]
     
-    is_six = equality(index_pip.y, middle_pip.y) \
+    is_six_right = equality(index_pip.y, middle_pip.y) and equality(middle_pip.y, ring_pip.y) \
         and thumb_cmc.y > thumb_mcp.y and thumb_mcp.y > thumb_ip.y and thumb_ip.y > thumb_tip.y \
-        and index_pip.x > thumb_tip.x and index_pip.y < index_dip.y and thumb_tip.y < index_tip.y
+        and index_pip.x > thumb_tip.x and index_pip.y < index_dip.y and thumb_tip.y < index_tip.y \
+        and equality(index_pip.y, pinky_pip.y)
 
-    return is_six
+    return is_six_right
+
+def is_six_left(hand_landmarks):
+    landmarks = hand_landmarks.landmark
+    index_pip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_PIP]
+    index_dip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_DIP]
+    index_tip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP]
+
+    thumb_cmc = landmarks[mp_hands.HandLandmark.THUMB_CMC]
+    thumb_mcp = landmarks[mp_hands.HandLandmark.THUMB_MCP]
+    thumb_ip = landmarks[mp_hands.HandLandmark.THUMB_IP]
+    thumb_tip = landmarks[mp_hands.HandLandmark.THUMB_TIP]
+
+    middle_pip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_PIP]
+    ring_pip = landmarks[mp_hands.HandLandmark.RING_FINGER_PIP]
+    pinky_pip = landmarks[mp_hands.HandLandmark.PINKY_PIP]
+    
+    is_six_left = equality(index_pip.y, middle_pip.y) and equality(middle_pip.y, ring_pip.y) \
+        and thumb_cmc.y > thumb_mcp.y and thumb_mcp.y > thumb_ip.y and thumb_ip.y > thumb_tip.y \
+        and index_pip.x < thumb_tip.x and index_pip.y < index_dip.y and thumb_tip.y < index_tip.y \
+        and equality(index_pip.y, pinky_pip.y)
+
+    return is_six_left
 
 def is_seven(hand_landmarks):
     landmarks = hand_landmarks.landmark
@@ -315,7 +340,7 @@ with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) a
                         right_hand_extended = True
                         #print("Right 5 Fingers Recognized")
 
-                    elif is_six(hand_landmarks):
+                    elif is_six_right(hand_landmarks):
                         print("6 Fingers Recognized")
                 
                     elif is_seven(hand_landmarks):
@@ -328,6 +353,8 @@ with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) a
                     if is_five_left(hand_landmarks):
                         left_hand_extended = True
                         #print("Left 5 Fingers Recognized")
+                    elif is_six_left(hand_landmarks):
+                        print("Left Thumb extended")
 
         # View Menu Action Here
         if right_hand_extended and left_hand_extended:
