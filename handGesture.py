@@ -224,33 +224,35 @@ with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) a
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR) 
         if results.multi_hand_landmarks: 
             for hand_landmarks in results.multi_hand_landmarks: 
+                handedness = results.multi_handedness[0].classification[0].label
                 mp_drawing.draw_landmarks(image, hand_landmarks, mp_hands.HAND_CONNECTIONS) 
+                if handedness == "Right":
 
-                # Check for gun gesture
-                if is_gun_gesture(hand_landmarks):
-                    print("Gun Gesture Recognized")
-                    #pyautogui.press('space')
+                    # Check for gun gesture
+                    if is_gun_gesture(hand_landmarks):
+                        print("Gun Gesture Recognized")
+                        #pyautogui.press('space')
 
-                elif is_one(hand_landmarks):
-                    print("1 Finger Recognized")
+                    elif is_one(hand_landmarks):
+                        print("1 Finger Recognized")
 
-                elif is_two(hand_landmarks):
-                    print("2 Fingers Recognized")
+                    elif is_two(hand_landmarks):
+                        print("2 Fingers Recognized")
 
-                elif is_three(hand_landmarks):
-                    print("3 Finger Recognized")
+                    elif is_three(hand_landmarks):
+                        print("3 Finger Recognized")
 
-                elif is_four(hand_landmarks):
-                    print("4 Fingers Recognized")
+                    elif is_four(hand_landmarks):
+                        print("4 Fingers Recognized")
 
-                elif is_five(hand_landmarks):
-                    print("5 Fingers Recognized")
+                    elif is_five(hand_landmarks):
+                        print("5 Fingers Recognized")
 
-                elif is_six(hand_landmarks):
-                    print("6 Fingers Recognized")
-
-                elif is_seven(hand_landmarks):
-                    print("7 Fingers Recognized")
+                    elif is_six(hand_landmarks):
+                        print("6 Fingers Recognized")
+                
+                    elif is_seven(hand_landmarks):
+                        print("7 Fingers Recognized")
 
         # Display image
         cv2.imshow('MediaPipe Hands', image)
