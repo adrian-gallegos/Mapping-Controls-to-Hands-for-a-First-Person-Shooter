@@ -132,7 +132,7 @@ def is_four(hand_landmarks):
     return is_four
 
 
-def is_five(hand_landmarks):
+def is_five_right(hand_landmarks):
     landmarks = hand_landmarks.landmark
 
     index_mcp = landmarks[mp_hands.HandLandmark.INDEX_FINGER_MCP]
@@ -159,12 +159,46 @@ def is_five(hand_landmarks):
     pinky_tip = landmarks[mp_hands.HandLandmark.PINKY_TIP]
     pinky_mcp = landmarks[mp_hands.HandLandmark.PINKY_MCP]
 
-    is_five =  index_tip.y < index_dip.y and index_dip.y < index_pip.y and index_pip.y < index_mcp.y \
+    is_five_right =  index_tip.y < index_dip.y and index_dip.y < index_pip.y and index_pip.y < index_mcp.y \
         and middle_tip.y < middle_dip.y and middle_dip.y < middle_pip.y and middle_pip.y < middle_mcp.y \
         and ring_tip.y < ring_dip.y and ring_dip.y < ring_pip.y and ring_pip.y < ring_mcp.y \
         and pinky_tip.y < pinky_dip.y and pinky_dip.y < pinky_pip.y and pinky_pip.y < pinky_mcp.y \
         and thumb_cmc.y > thumb_mcp.y and thumb_mcp.y > thumb_ip.y and thumb_ip.y > thumb_tip.y and thumb_tip.x < thumb_ip.x
-    return is_five
+    return is_five_right
+
+def is_five_left(hand_landmarks):
+    landmarks = hand_landmarks.landmark
+
+    index_mcp = landmarks[mp_hands.HandLandmark.INDEX_FINGER_MCP]
+    index_pip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_PIP]
+    index_dip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_DIP]
+    index_tip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP]
+    middle_tip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
+    middle_mcp = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_MCP]
+    ring_tip = landmarks[mp_hands.HandLandmark.RING_FINGER_TIP]
+    ring_mcp = landmarks[mp_hands.HandLandmark.RING_FINGER_MCP]
+
+    thumb_cmc = landmarks[mp_hands.HandLandmark.THUMB_CMC]
+    thumb_mcp = landmarks[mp_hands.HandLandmark.THUMB_MCP]
+    thumb_ip = landmarks[mp_hands.HandLandmark.THUMB_IP]
+    thumb_tip = landmarks[mp_hands.HandLandmark.THUMB_TIP]
+
+    middle_pip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_PIP]
+    ring_pip = landmarks[mp_hands.HandLandmark.RING_FINGER_PIP]
+    pinky_pip = landmarks[mp_hands.HandLandmark.PINKY_PIP]
+
+    middle_dip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_DIP]
+    ring_dip = landmarks[mp_hands.HandLandmark.RING_FINGER_DIP]
+    pinky_dip = landmarks[mp_hands.HandLandmark.PINKY_DIP]
+    pinky_tip = landmarks[mp_hands.HandLandmark.PINKY_TIP]
+    pinky_mcp = landmarks[mp_hands.HandLandmark.PINKY_MCP]
+
+    is_five_left =  index_tip.y < index_dip.y and index_dip.y < index_pip.y and index_pip.y < index_mcp.y \
+        and middle_tip.y < middle_dip.y and middle_dip.y < middle_pip.y and middle_pip.y < middle_mcp.y \
+        and ring_tip.y < ring_dip.y and ring_dip.y < ring_pip.y and ring_pip.y < ring_mcp.y \
+        and pinky_tip.y < pinky_dip.y and pinky_dip.y < pinky_pip.y and pinky_pip.y < pinky_mcp.y \
+        and thumb_cmc.y > thumb_mcp.y and thumb_mcp.y > thumb_ip.y and thumb_ip.y > thumb_tip.y and thumb_tip.x > thumb_ip.x
+    return is_five_left
 
 def is_six(hand_landmarks):
     landmarks = hand_landmarks.landmark
@@ -222,12 +256,15 @@ with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) a
         
         # Draw hand landmarks 
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR) 
+        
+        right_hand_extended = False
+        left_hand_extended = False
+        
         if results.multi_hand_landmarks: 
-            for hand_landmarks in results.multi_hand_landmarks: 
-                handedness = results.multi_handedness[0].classification[0].label
+            for hand_landmarks, handedness in zip(results.multi_hand_landmarks, results.multi_handedness): 
+                hand_label = handedness.classification[0].label
                 mp_drawing.draw_landmarks(image, hand_landmarks, mp_hands.HAND_CONNECTIONS) 
-                if handedness == "Right":
-
+                if hand_label == "Right":
                     # Check for gun gesture
                     if is_gun_gesture(hand_landmarks):
                         print("Gun Gesture Recognized")
@@ -245,14 +282,30 @@ with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) a
                     elif is_four(hand_landmarks):
                         print("4 Fingers Recognized")
 
-                    elif is_five(hand_landmarks):
-                        print("5 Fingers Recognized")
+                    elif is_five_right(hand_landmarks):
+                        right_hand_extended = True
+                        #print("Right 5 Fingers Recognized")
 
                     elif is_six(hand_landmarks):
                         print("6 Fingers Recognized")
                 
                     elif is_seven(hand_landmarks):
                         print("7 Fingers Recognized")
+                
+                elif hand_label == "Left":
+                    if is_five_left(hand_landmarks):
+                        left_hand_extended = True
+                        #print("Left 5 Fingers Recognized")
+
+        # View Menu Action Here
+        if right_hand_extended and left_hand_extended:
+            print("Both hands have all fingers extended")
+        # Switch to weapon 5
+        elif right_hand_extended and not left_hand_extended:
+            print("Right 5 Fingers Recognized")
+        # No key/action in game
+        elif not right_hand_extended and left_hand_extended:
+            print("Left 5 Fingers Recognized")
 
         # Display image
         cv2.imshow('MediaPipe Hands', image)
@@ -263,3 +316,4 @@ with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) a
 
 cap.release()
 cv2.destroyAllWindows()
+
