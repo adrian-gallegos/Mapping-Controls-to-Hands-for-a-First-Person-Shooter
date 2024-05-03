@@ -409,6 +409,7 @@ def is_point_down(hand_landmarks):
     return is_point_down
 
 with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) as hands: 
+    toggle_run = False
     while cap.isOpened():
         success, image = cap.read() 
         if not success: 
@@ -457,7 +458,8 @@ with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) a
                         print("7 Fingers Recognized")
 
                     elif is_hookem(hand_landmarks):
-                        print("HOOK'EM BABY")
+                        toggle_run = not toggle_run
+                        #print("HOOK'EM BABY")
 
                     elif is_one_pointer_right(hand_landmarks):
                         print("TURN RIGHT")
@@ -472,9 +474,15 @@ with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) a
                     elif is_six_left(hand_landmarks):
                         print("Left Thumb extended")
                     elif is_point_up(hand_landmarks):
-                        print("MOVE FORWARD")
+                        if not toggle_run:
+                            print("WALK FORWARD")
+                        else:
+                            print("RUN FORWARD")
                     elif is_point_down(hand_landmarks):
-                        print("MOVE BACKWARD")
+                        if not toggle_run:
+                            print("WALK BACKWARD")
+                        else:
+                            print("RUN BACKWARD")
 
         # View Menu Action Here
         if right_hand_extended and left_hand_extended:
