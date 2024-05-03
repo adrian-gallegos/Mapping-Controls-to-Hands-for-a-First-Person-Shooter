@@ -352,6 +352,62 @@ def is_one_pointer_left(hand_landmarks):
     
     return is_one_pointer_left
 
+def is_point_up(hand_landmarks):
+    landmarks = hand_landmarks.landmark
+    index_mcp = landmarks[mp_hands.HandLandmark.INDEX_FINGER_MCP]
+    index_pip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_PIP]
+    index_dip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_DIP]
+    index_tip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP]
+    
+    pinky_dip = landmarks[mp_hands.HandLandmark.PINKY_DIP]
+    pinky_tip = landmarks[mp_hands.HandLandmark.PINKY_TIP]
+    pinky_mcp = landmarks[mp_hands.HandLandmark.PINKY_MCP]
+    pinky_pip = landmarks[mp_hands.HandLandmark.PINKY_PIP]
+    
+    thumb_tip = landmarks[mp_hands.HandLandmark.THUMB_TIP]
+    thumb_ip = landmarks[mp_hands.HandLandmark.THUMB_IP]
+    middle_dip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_DIP]
+    middle_pip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_PIP]
+    middle_tip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
+    middle_mcp = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_MCP]
+    ring_pip = landmarks[mp_hands.HandLandmark.RING_FINGER_PIP]    
+    ring_dip = landmarks[mp_hands.HandLandmark.RING_FINGER_DIP]
+    ring_mcp = landmarks[mp_hands.HandLandmark.RING_FINGER_MCP]
+    
+    is_point_up = index_tip.y < index_dip.y and index_dip.y < index_pip.y and index_pip.y < index_mcp.y \
+        and index_pip.y < middle_pip.y and index_pip.y < ring_pip.y and index_pip.y < pinky_pip.y and index_pip.y < thumb_tip.y \
+        and middle_pip.y < middle_dip.y and ring_pip.y < ring_dip.y and pinky_pip.y < pinky_dip.y and index_pip.x > thumb_tip.x
+    
+    return is_point_up
+
+def is_point_down(hand_landmarks):
+    landmarks = hand_landmarks.landmark
+    index_mcp = landmarks[mp_hands.HandLandmark.INDEX_FINGER_MCP]
+    index_pip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_PIP]
+    index_dip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_DIP]
+    index_tip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP]
+    
+    pinky_dip = landmarks[mp_hands.HandLandmark.PINKY_DIP]
+    pinky_tip = landmarks[mp_hands.HandLandmark.PINKY_TIP]
+    pinky_mcp = landmarks[mp_hands.HandLandmark.PINKY_MCP]
+    pinky_pip = landmarks[mp_hands.HandLandmark.PINKY_PIP]
+    
+    thumb_tip = landmarks[mp_hands.HandLandmark.THUMB_TIP]
+    thumb_ip = landmarks[mp_hands.HandLandmark.THUMB_IP]
+    middle_dip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_DIP]
+    middle_pip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_PIP]
+    middle_tip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
+    middle_mcp = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_MCP]
+    ring_pip = landmarks[mp_hands.HandLandmark.RING_FINGER_PIP]    
+    ring_dip = landmarks[mp_hands.HandLandmark.RING_FINGER_DIP]
+    ring_mcp = landmarks[mp_hands.HandLandmark.RING_FINGER_MCP]
+    
+    is_point_down = index_tip.y > index_dip.y and index_dip.y > index_pip.y and index_pip.y > index_mcp.y \
+        and index_pip.y > middle_pip.y and index_pip.y > ring_pip.y and index_pip.y > pinky_pip.y and index_pip.y > thumb_tip.y \
+        and middle_pip.y > middle_dip.y and ring_pip.y > ring_dip.y and pinky_pip.y > pinky_dip.y and index_pip.x > thumb_tip.x
+    
+    return is_point_down
+
 with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) as hands: 
     while cap.isOpened():
         success, image = cap.read() 
@@ -415,6 +471,10 @@ with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) a
                         #print("Left 5 Fingers Recognized")
                     elif is_six_left(hand_landmarks):
                         print("Left Thumb extended")
+                    elif is_point_up(hand_landmarks):
+                        print("MOVE FORWARD")
+                    elif is_point_down(hand_landmarks):
+                        print("MOVE BACKWARD")
 
         # View Menu Action Here
         if right_hand_extended and left_hand_extended:
