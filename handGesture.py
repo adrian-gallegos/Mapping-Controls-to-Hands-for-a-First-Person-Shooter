@@ -1,6 +1,7 @@
 import cv2 
 import mediapipe as mp 
 import pyautogui
+import pydirectinput
 
 mp_hands = mp.solutions.hands 
 mp_drawing = mp.solutions.drawing_utils 
@@ -20,6 +21,9 @@ def is_gun_gesture(hand_landmarks):
 
     is_gun = index_tip.y < middle_finger_tip.y and thumb_tip.y < index_tip.y \
         and abs(index_tip.x - thumb_tip.x) > 0.1 and abs(index_pip.y - pinky_pip.y) > 0.1
+    
+    # if is_gun:
+    #     pydirectinput.press('ctrl')
 
     return is_gun
 
@@ -460,19 +464,23 @@ with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) a
                     # Check for gun gesture
                     if is_gun_gesture(hand_landmarks):
                         print("Gun Gesture Recognized")
-                        #pyautogui.press('space')
+                        pydirectinput.press('ctrl')
 
                     elif is_one(hand_landmarks):
                         print("1 Finger Recognized")
+                        pydirectinput.press('1')
 
                     elif is_two(hand_landmarks):
                         print("2 Fingers Recognized")
+                        pydirectinput.press('2')
 
                     elif is_three(hand_landmarks):
                         print("3 Finger Recognized")
+                        pydirectinput.press('3')
 
                     elif is_four(hand_landmarks):
                         print("4 Fingers Recognized")
+                        pydirectinput.press('4')
 
                     elif is_five_right(hand_landmarks):
                         right_hand_extended = True
@@ -480,9 +488,11 @@ with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) a
 
                     elif is_six_right(hand_landmarks):
                         print("6 Fingers Recognized")
+                        pydirectinput.press('6')
                 
                     elif is_seven(hand_landmarks):
                         print("7 Fingers Recognized")
+                        pydirectinput.press('7')
 
                     elif is_hookem(hand_landmarks):
                         toggle_run = not toggle_run
@@ -490,9 +500,11 @@ with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) a
 
                     elif is_one_pointer_right(hand_landmarks):
                         print("TURN RIGHT")
+                        pydirectinput.press('right')
 
                     elif is_one_pointer_left(hand_landmarks):
                         print("TURN LEFT")
+                        pydirectinput.press('left')
                 
                 elif hand_label == "Left":
                     if is_five_left(hand_landmarks):
@@ -500,25 +512,45 @@ with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) a
                         #print("Left 5 Fingers Recognized")
                     elif is_six_left(hand_landmarks):
                         print("Left Thumb extended")
+                        pydirectinput.keyDown('shift')
+                        pydirectinput.keyDown('right')
+                        pydirectinput.keyUp('shift')
+                        pydirectinput.keyUp('right')
                     elif is_point_up(hand_landmarks):
                         if not toggle_run:
                             print("WALK FORWARD")
+                            pydirectinput.press('up')
                         else:
                             print("RUN FORWARD")
+                            pydirectinput.keyDown('shift')
+                            pydirectinput.keyDown('up')
+                            pydirectinput.keyUp('shift')
+                            pydirectinput.keyUp('up')
                     elif is_point_down(hand_landmarks):
                         if not toggle_run:
                             print("WALK BACKWARD")
+                            pydirectinput.press('down')
                         else:
                             print("RUN BACKWARD")
+                            pydirectinput.keyDown('shift')
+                            pydirectinput.keyDown('down')
+                            pydirectinput.keyUp('shift')
+                            pydirectinput.keyUp('down')
                     elif is_left_pinky_up(hand_landmarks):
                         print("Left pinky up")
+                        pydirectinput.keyDown('shift')
+                        pydirectinput.keyDown('left')
+                        pydirectinput.keyUp('shift')
+                        pydirectinput.keyUp('left')
 
         # View Menu Action Here
         if right_hand_extended and left_hand_extended:
             print("Both hands have all fingers extended")
+            pydirectinput.press('esc')
         # Switch to weapon 5
         elif right_hand_extended and not left_hand_extended:
             print("Right 5 Fingers Recognized")
+            pydirectinput.press('5')
         # No key/action in game
         elif not right_hand_extended and left_hand_extended:
             print("Left 5 Fingers Recognized")
@@ -531,5 +563,6 @@ with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) a
             break 
 
 cap.release()
+
 cv2.destroyAllWindows()
 
