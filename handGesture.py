@@ -273,6 +273,42 @@ def is_hookem(hand_landmarks):
     
     return is_hookem
 
+def is_circle(hand_landmarks):
+    
+    landmarks = hand_landmarks.landmark
+    
+    # Define the landmarks of interest
+    thumb_tip = landmarks[mp_hands.HandLandmark.THUMB_TIP]
+    index_tip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP]
+    middle_tip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
+    ring_tip = landmarks[mp_hands.HandLandmark.RING_FINGER_TIP]
+    pinky_tip = landmarks[mp_hands.HandLandmark.PINKY_TIP]
+
+    # Calculate the distances between fingertips
+    thumb_index_dist = ((thumb_tip.x - index_tip.x)**2 + (thumb_tip.y - index_tip.y)**2)**0.5
+    index_middle_dist = ((index_tip.x - middle_tip.x)**2 + (index_tip.y - middle_tip.y)**2)**0.5
+    middle_ring_dist = ((middle_tip.x - ring_tip.x)**2 + (middle_tip.y - ring_tip.y)**2)**0.5
+    ring_pinky_dist = ((ring_tip.x - pinky_tip.x)**2 + (ring_tip.y - pinky_tip.y)**2)**0.5
+
+    # Define a threshold for the distances to check if hand gesture forms a "C"
+    distance_threshold = 0.05  # Adjust as needed based on your setup
+
+    # Check if the distances between fingertips suggest a "C" shape
+    is_circle = (
+        # # Check if thumb and index finger are close
+        # thumb_index_dist < distance_threshold and
+        # Check if middle, ring, and pinky fingers are close to each other
+        index_middle_dist < distance_threshold and
+        middle_ring_dist < distance_threshold and
+        ring_pinky_dist < distance_threshold and
+        # Check if the thumb is above the other fingertips
+        thumb_tip.y < index_tip.y and thumb_tip.y < middle_tip.y and thumb_tip.y < ring_tip.y and thumb_tip.y < pinky_tip.y 
+        # # Check if the index finger is higher than the ring and pinky fingers
+        # index_tip.y < ring_tip.y and index_tip.y < pinky_tip.y
+    )
+        
+    return is_circle
+
 with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) as hands: 
     while cap.isOpened():
         success, image = cap.read() 
@@ -323,10 +359,17 @@ with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) a
 
                     elif is_hookem(hand_landmarks):
                         print("HOOK'EM BABY")
+                    
+                    elif is_circle(hand_landmarks):
+                        print(" Right circle")    
                 
                 elif hand_label == "Left":
                     if is_five_left(hand_landmarks):
                         left_hand_extended = True
+                        #print("Left 5 Fingers Recognized")
+                        
+                    elif is_circle(hand_landmarks):
+                        print(" Left circle")    
                         #print("Left 5 Fingers Recognized")
 
         # View Menu Action Here
