@@ -1,6 +1,7 @@
 import cv2 
 import mediapipe as mp 
 import pyautogui
+import pydirectinput
 
 mp_hands = mp.solutions.hands 
 mp_drawing = mp.solutions.drawing_utils 
@@ -15,9 +16,14 @@ def is_gun_gesture(hand_landmarks):
     thumb_tip = landmarks[mp_hands.HandLandmark.THUMB_TIP]
     index_tip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP]
     middle_finger_tip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
+    index_pip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_PIP]
+    pinky_pip = landmarks[mp_hands.HandLandmark.PINKY_PIP]
 
     is_gun = index_tip.y < middle_finger_tip.y and thumb_tip.y < index_tip.y \
-        and abs(index_tip.x - thumb_tip.x) > 0.1
+        and abs(index_tip.x - thumb_tip.x) > 0.1 and abs(index_pip.y - pinky_pip.y) > 0.1
+    
+    # if is_gun:
+    #     pydirectinput.press('ctrl')
 
     return is_gun
 
@@ -200,7 +206,7 @@ def is_five_left(hand_landmarks):
         and thumb_cmc.y > thumb_mcp.y and thumb_mcp.y > thumb_ip.y and thumb_ip.y > thumb_tip.y and thumb_tip.x > thumb_ip.x
     return is_five_left
 
-def is_six(hand_landmarks):
+def is_six_right(hand_landmarks):
     landmarks = hand_landmarks.landmark
     index_pip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_PIP]
     index_dip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_DIP]
@@ -215,11 +221,34 @@ def is_six(hand_landmarks):
     ring_pip = landmarks[mp_hands.HandLandmark.RING_FINGER_PIP]
     pinky_pip = landmarks[mp_hands.HandLandmark.PINKY_PIP]
     
-    is_six = equality(index_pip.y, middle_pip.y) \
+    is_six_right = equality(index_pip.y, middle_pip.y) and equality(middle_pip.y, ring_pip.y) \
         and thumb_cmc.y > thumb_mcp.y and thumb_mcp.y > thumb_ip.y and thumb_ip.y > thumb_tip.y \
-        and index_pip.x > thumb_tip.x and index_pip.y < index_dip.y and thumb_tip.y < index_tip.y
+        and index_pip.x > thumb_tip.x and index_pip.y < index_dip.y and thumb_tip.y < index_tip.y \
+        and equality(index_pip.y, pinky_pip.y)
 
-    return is_six
+    return is_six_right
+
+def is_six_left(hand_landmarks):
+    landmarks = hand_landmarks.landmark
+    index_pip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_PIP]
+    index_dip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_DIP]
+    index_tip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP]
+
+    thumb_cmc = landmarks[mp_hands.HandLandmark.THUMB_CMC]
+    thumb_mcp = landmarks[mp_hands.HandLandmark.THUMB_MCP]
+    thumb_ip = landmarks[mp_hands.HandLandmark.THUMB_IP]
+    thumb_tip = landmarks[mp_hands.HandLandmark.THUMB_TIP]
+
+    middle_pip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_PIP]
+    ring_pip = landmarks[mp_hands.HandLandmark.RING_FINGER_PIP]
+    pinky_pip = landmarks[mp_hands.HandLandmark.PINKY_PIP]
+    
+    is_six_left = equality(index_pip.y, middle_pip.y) and equality(middle_pip.y, ring_pip.y) \
+        and thumb_cmc.y > thumb_mcp.y and thumb_mcp.y > thumb_ip.y and thumb_ip.y > thumb_tip.y \
+        and index_pip.x < thumb_tip.x and index_pip.y < index_dip.y and thumb_tip.y < index_tip.y \
+        and equality(index_pip.y, pinky_pip.y)
+
+    return is_six_left
 
 def is_seven(hand_landmarks):
     landmarks = hand_landmarks.landmark
@@ -273,6 +302,143 @@ def is_hookem(hand_landmarks):
     
     return is_hookem
 
+def is_one_pointer_right(hand_landmarks):
+    landmarks = hand_landmarks.landmark
+    index_mcp = landmarks[mp_hands.HandLandmark.INDEX_FINGER_MCP]
+    index_pip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_PIP]
+    index_dip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_DIP]
+    index_tip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP]
+    
+    pinky_dip = landmarks[mp_hands.HandLandmark.PINKY_DIP]
+    pinky_tip = landmarks[mp_hands.HandLandmark.PINKY_TIP]
+    pinky_mcp = landmarks[mp_hands.HandLandmark.PINKY_MCP]
+    pinky_pip = landmarks[mp_hands.HandLandmark.PINKY_PIP]
+    
+    thumb_tip = landmarks[mp_hands.HandLandmark.THUMB_TIP]
+    thumb_ip = landmarks[mp_hands.HandLandmark.THUMB_IP]
+    middle_dip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_DIP]
+    middle_pip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_PIP]
+    middle_mcp = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_MCP]
+    ring_pip = landmarks[mp_hands.HandLandmark.RING_FINGER_PIP]    
+    ring_dip = landmarks[mp_hands.HandLandmark.RING_FINGER_DIP]
+    ring_mcp = landmarks[mp_hands.HandLandmark.RING_FINGER_MCP]
+    
+    is_one_pointer_right = index_mcp.y < index_dip.y and middle_mcp.y < middle_dip.y and ring_mcp.y < ring_dip.y \
+        and pinky_mcp.y < pinky_dip.y and thumb_tip.y > index_dip.y and abs(index_pip.y - thumb_tip.y) > 0.1 \
+        and index_mcp.x < index_tip.x
+    
+    return is_one_pointer_right
+
+def is_one_pointer_left(hand_landmarks):
+    landmarks = hand_landmarks.landmark
+    index_mcp = landmarks[mp_hands.HandLandmark.INDEX_FINGER_MCP]
+    index_pip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_PIP]
+    index_dip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_DIP]
+    index_tip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP]
+    
+    pinky_dip = landmarks[mp_hands.HandLandmark.PINKY_DIP]
+    pinky_tip = landmarks[mp_hands.HandLandmark.PINKY_TIP]
+    pinky_mcp = landmarks[mp_hands.HandLandmark.PINKY_MCP]
+    pinky_pip = landmarks[mp_hands.HandLandmark.PINKY_PIP]
+    
+    thumb_tip = landmarks[mp_hands.HandLandmark.THUMB_TIP]
+    thumb_ip = landmarks[mp_hands.HandLandmark.THUMB_IP]
+    middle_dip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_DIP]
+    middle_pip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_PIP]
+    middle_mcp = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_MCP]
+    ring_pip = landmarks[mp_hands.HandLandmark.RING_FINGER_PIP]    
+    ring_dip = landmarks[mp_hands.HandLandmark.RING_FINGER_DIP]
+    ring_mcp = landmarks[mp_hands.HandLandmark.RING_FINGER_MCP]
+    
+    is_one_pointer_left = index_mcp.y < index_dip.y and middle_mcp.y < middle_dip.y and ring_mcp.y < ring_dip.y \
+        and pinky_mcp.y < pinky_dip.y and thumb_tip.y > index_dip.y and abs(index_pip.y - thumb_tip.y) > 0.1 \
+        and index_mcp.x > index_tip.x
+    
+    return is_one_pointer_left
+
+def is_point_up(hand_landmarks):
+    landmarks = hand_landmarks.landmark
+    index_mcp = landmarks[mp_hands.HandLandmark.INDEX_FINGER_MCP]
+    index_pip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_PIP]
+    index_dip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_DIP]
+    index_tip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP]
+    
+    pinky_dip = landmarks[mp_hands.HandLandmark.PINKY_DIP]
+    pinky_tip = landmarks[mp_hands.HandLandmark.PINKY_TIP]
+    pinky_mcp = landmarks[mp_hands.HandLandmark.PINKY_MCP]
+    pinky_pip = landmarks[mp_hands.HandLandmark.PINKY_PIP]
+    
+    thumb_tip = landmarks[mp_hands.HandLandmark.THUMB_TIP]
+    thumb_ip = landmarks[mp_hands.HandLandmark.THUMB_IP]
+    middle_dip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_DIP]
+    middle_pip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_PIP]
+    middle_tip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
+    middle_mcp = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_MCP]
+    ring_pip = landmarks[mp_hands.HandLandmark.RING_FINGER_PIP]    
+    ring_dip = landmarks[mp_hands.HandLandmark.RING_FINGER_DIP]
+    ring_mcp = landmarks[mp_hands.HandLandmark.RING_FINGER_MCP]
+    
+    is_point_up = index_tip.y < index_dip.y and index_dip.y < index_pip.y and index_pip.y < index_mcp.y \
+        and index_pip.y < middle_pip.y and index_pip.y < ring_pip.y and index_pip.y < pinky_pip.y and index_pip.y < thumb_tip.y \
+        and middle_pip.y < middle_dip.y and ring_pip.y < ring_dip.y and pinky_pip.y < pinky_dip.y and index_pip.x > thumb_tip.x
+    
+    return is_point_up
+
+def is_point_down(hand_landmarks):
+    landmarks = hand_landmarks.landmark
+    index_mcp = landmarks[mp_hands.HandLandmark.INDEX_FINGER_MCP]
+    index_pip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_PIP]
+    index_dip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_DIP]
+    index_tip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP]
+    
+    pinky_dip = landmarks[mp_hands.HandLandmark.PINKY_DIP]
+    pinky_tip = landmarks[mp_hands.HandLandmark.PINKY_TIP]
+    pinky_mcp = landmarks[mp_hands.HandLandmark.PINKY_MCP]
+    pinky_pip = landmarks[mp_hands.HandLandmark.PINKY_PIP]
+    
+    thumb_tip = landmarks[mp_hands.HandLandmark.THUMB_TIP]
+    thumb_ip = landmarks[mp_hands.HandLandmark.THUMB_IP]
+    middle_dip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_DIP]
+    middle_pip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_PIP]
+    middle_tip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
+    middle_mcp = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_MCP]
+    ring_pip = landmarks[mp_hands.HandLandmark.RING_FINGER_PIP]    
+    ring_dip = landmarks[mp_hands.HandLandmark.RING_FINGER_DIP]
+    ring_mcp = landmarks[mp_hands.HandLandmark.RING_FINGER_MCP]
+    
+    is_point_down = index_tip.y > index_dip.y and index_dip.y > index_pip.y and index_pip.y > index_mcp.y \
+        and index_pip.y > middle_pip.y and index_pip.y > ring_pip.y and index_pip.y > pinky_pip.y and index_pip.y > thumb_tip.y \
+        and middle_pip.y > middle_dip.y and ring_pip.y > ring_dip.y and pinky_pip.y > pinky_dip.y and index_pip.x > thumb_tip.x
+    
+    return is_point_down
+
+def is_left_pinky_up(hand_landmarks):
+    landmarks = hand_landmarks.landmark
+    index_mcp = landmarks[mp_hands.HandLandmark.INDEX_FINGER_MCP]
+    index_pip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_PIP]
+    index_dip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_DIP]
+    index_tip = landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP]
+    
+    pinky_dip = landmarks[mp_hands.HandLandmark.PINKY_DIP]
+    pinky_tip = landmarks[mp_hands.HandLandmark.PINKY_TIP]
+    pinky_mcp = landmarks[mp_hands.HandLandmark.PINKY_MCP]
+    pinky_pip = landmarks[mp_hands.HandLandmark.PINKY_PIP]
+    
+    thumb_tip = landmarks[mp_hands.HandLandmark.THUMB_TIP]
+    thumb_ip = landmarks[mp_hands.HandLandmark.THUMB_IP]
+    middle_dip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_DIP]
+    middle_pip = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_PIP]
+    middle_mcp = landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_MCP]
+    ring_pip = landmarks[mp_hands.HandLandmark.RING_FINGER_PIP]    
+    ring_dip = landmarks[mp_hands.HandLandmark.RING_FINGER_DIP]
+    ring_mcp = landmarks[mp_hands.HandLandmark.RING_FINGER_MCP]
+    
+    is_left_pinky_up = pinky_tip.y < pinky_dip.y and pinky_dip.y < pinky_pip.y and pinky_pip.y < pinky_mcp.y \
+        and index_pip.y < thumb_tip.y and thumb_tip.x < thumb_ip.x \
+        and index_pip.y < index_mcp.y and middle_pip.y < middle_mcp.y and ring_pip.y < ring_mcp.y
+    
+    return is_left_pinky_up
+
 def is_circle(hand_landmarks):
     
     landmarks = hand_landmarks.landmark
@@ -310,6 +476,7 @@ def is_circle(hand_landmarks):
     return is_circle
 
 with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) as hands: 
+    toggle_run = False
     while cap.isOpened():
         success, image = cap.read() 
         if not success: 
@@ -333,40 +500,76 @@ with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) a
                     # Check for gun gesture
                     if is_gun_gesture(hand_landmarks):
                         print("Gun Gesture Recognized")
-                        #pyautogui.press('space')
+                        pydirectinput.press('ctrl')
 
                     elif is_one(hand_landmarks):
                         print("1 Finger Recognized")
+                        pydirectinput.press('1')
 
                     elif is_two(hand_landmarks):
                         print("2 Fingers Recognized")
+                        pydirectinput.press('2')
 
                     elif is_three(hand_landmarks):
                         print("3 Finger Recognized")
+                        pydirectinput.press('3')
 
                     elif is_four(hand_landmarks):
                         print("4 Fingers Recognized")
+                        pydirectinput.press('4')
 
                     elif is_five_right(hand_landmarks):
                         right_hand_extended = True
                         #print("Right 5 Fingers Recognized")
 
-                    elif is_six(hand_landmarks):
+                    elif is_six_right(hand_landmarks):
                         print("6 Fingers Recognized")
+                        pydirectinput.press('6')
                 
                     elif is_seven(hand_landmarks):
                         print("7 Fingers Recognized")
+                        pydirectinput.press('7')
 
                     elif is_hookem(hand_landmarks):
-                        print("HOOK'EM BABY")
-                    
-                    elif is_circle(hand_landmarks):
-                        print(" Right circle")    
+                        toggle_run = not toggle_run
+                        #print("HOOK'EM BABY")
                 
                 elif hand_label == "Left":
                     if is_five_left(hand_landmarks):
                         left_hand_extended = True
                         #print("Left 5 Fingers Recognized")
+                    elif is_six_left(hand_landmarks):
+                        print("Left Thumb extended")
+                        pydirectinput.keyDown('shift')
+                        pydirectinput.keyDown('right')
+                        pydirectinput.keyUp('shift')
+                        pydirectinput.keyUp('right')
+                    elif is_point_up(hand_landmarks):
+                        if not toggle_run:
+                            print("WALK FORWARD")
+                            pydirectinput.press('up')
+                        else:
+                            print("RUN FORWARD")
+                            pydirectinput.keyDown('shift')
+                            pydirectinput.keyDown('up')
+                            pydirectinput.keyUp('shift')
+                            pydirectinput.keyUp('up')
+                    elif is_point_down(hand_landmarks):
+                        if not toggle_run:
+                            print("WALK BACKWARD")
+                            pydirectinput.press('down')
+                        else:
+                            print("RUN BACKWARD")
+                            pydirectinput.keyDown('shift')
+                            pydirectinput.keyDown('down')
+                            pydirectinput.keyUp('shift')
+                            pydirectinput.keyUp('down')
+                    elif is_left_pinky_up(hand_landmarks):
+                        print("Left pinky up")
+                        pydirectinput.keyDown('shift')
+                        pydirectinput.keyDown('left')
+                        pydirectinput.keyUp('shift')
+                        pydirectinput.keyUp('left')
                         
                     elif is_circle(hand_landmarks):
                         print(" Left circle")    
@@ -375,9 +578,11 @@ with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) a
         # View Menu Action Here
         if right_hand_extended and left_hand_extended:
             print("Both hands have all fingers extended")
+            pydirectinput.press('esc')
         # Switch to weapon 5
         elif right_hand_extended and not left_hand_extended:
             print("Right 5 Fingers Recognized")
+            pydirectinput.press('5')
         # No key/action in game
         elif not right_hand_extended and left_hand_extended:
             print("Left 5 Fingers Recognized")
@@ -390,5 +595,6 @@ with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) a
             break 
 
 cap.release()
+
 cv2.destroyAllWindows()
 
